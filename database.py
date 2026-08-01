@@ -3,7 +3,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 
 
-DATABASE_URL = "postgresql://apiuser:apipass@localhost:5432/apidb"
+DATABASE_URL = "postgresql://apiuser:apipass@db:5432/apidb"
 
 engine = create_engine(DATABASE_URL)
 
