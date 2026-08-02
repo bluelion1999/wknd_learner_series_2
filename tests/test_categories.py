@@ -26,5 +26,32 @@ def test_get_categories(client):
     
     assert response.status_code == 200
     assert len(response.json()) >=2
+
+def test_create_category_without_description(client):
+    response = client.post("/categories", json={"name": "books"})
+    
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert data["description"] is None
+    
+    
+def test_create_category_empty_name(client):
+    response = client.post("/categories", json={"name": "", "description": "asdfgasdf"})
+        
+    assert response.status_code == 422
+
+def test_create_category_blank_name(client):
+    response = client.post("/categories", json={"name": " ", "description": "asdfasdf"})
+        
+    assert response.status_code == 422
+
+def test_create_category_strips_name(client):
+    response = client.post("/categories", json={"name": " spaced ", "description": "asdfasdf"})
+        
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert data["name"] == "spaced"
     
     

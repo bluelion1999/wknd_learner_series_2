@@ -67,4 +67,27 @@ def test_delete_item_not_found(client):
     response = client.delete("/items/999")
     
     assert response.status_code == 404
- 
+
+def test_create_item_negative_price(client):
+    response = client.post("/items", json={"name": "chocolate bar", "price": -1.99})
+        
+    assert response.status_code == 422
+
+def test_create_item_empty_name(client):
+    response = client.post("/items", json={"name": "", "price": 1.99})
+        
+    assert response.status_code == 422
+
+def test_create_item_blank_name(client):
+    response = client.post("/items", json={"name": " ", "price": 1.99})
+        
+    assert response.status_code == 422
+
+def test_create_item_strips_name(client):
+    response = client.post("/items", json={"name": " spaced ", "price": 1.99})
+        
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert data["name"] == "spaced"
+    
