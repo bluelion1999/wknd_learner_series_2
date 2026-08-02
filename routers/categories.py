@@ -7,15 +7,17 @@ from schemas import CategoryCreate, CategoryResponse
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
+
 @router.get("", response_model=list[CategoryResponse])
-def get_categories(db: Session=Depends(get_db)):
-    db_category = db.query(CategoryDB).all()
-    return db_category
+def list_categories(db: Session = Depends(get_db)):
+    db_categories = db.query(CategoryDB).all()
+    return db_categories
+
 
 @router.post("", response_model=CategoryResponse)
-def post_categories(category: CategoryCreate, db: Session=Depends(get_db)):
-    db_category = CategoryDB(name = category.name, description = category.description)
-    try:   
+def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
+    db_category = CategoryDB(name=category.name, description=category.description)
+    try:
         db.add(db_category)
         db.commit()
     except IntegrityError:
