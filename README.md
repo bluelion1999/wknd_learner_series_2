@@ -28,8 +28,6 @@ docker compose up --build -d
 docker compose exec api alembic upgrade head
 ```
 
-The API is at **http://127.0.0.1:8000**, interactive docs at **http://127.0.0.1:8000/docs**.
-
 ## API
 
 ### Items
