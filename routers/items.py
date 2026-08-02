@@ -20,7 +20,7 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
 
 @router.post("", response_model=ItemResponse)
 def post_items(item: ItemCreate, db: Session = Depends(get_db)):
-    db_item = ItemDB(name=item.name, price=item.price, in_stock=item.in_stock)
+    db_item = ItemDB(name=item.name, price=item.price, category_id=item.category_id, in_stock=item.in_stock)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
@@ -34,7 +34,9 @@ def update_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
     
     db_item.name = item.name
     db_item.price = item.price
+    db_item.category_id = item.category_id
     db_item.in_stock = item.in_stock
+    
     
     db.commit()
     db.refresh(db_item)

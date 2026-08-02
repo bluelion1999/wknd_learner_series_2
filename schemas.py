@@ -4,12 +4,14 @@ from datetime import datetime
 class ItemCreate(BaseModel):
     name: str
     price: float
+    category_id: int | None = None
     in_stock: bool = True
 
 class ItemResponse(BaseModel):
     id: int
     name: str
     price: float
+    category_id: int | None
     in_stock: bool
     
     class Config:
