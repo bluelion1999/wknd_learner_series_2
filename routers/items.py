@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from database import get_db
 from models import ItemDB
 from schemas import DeleteResponse, ItemCreate, ItemResponse
@@ -17,7 +17,10 @@ def get_item_or_404(item_id: int, db: Session = Depends(get_db)) -> ItemDB:
 
 @router.get("", response_model=list[ItemResponse])
 def list_items(db: Session = Depends(get_db)):
-    db_items = db.execute(select(ItemDB)).scalars().all()
+    db_items = db.execute(
+        select(ItemDB).options(selectinload(ItemDB.category))
+    ).scalars().all()
+
     return db_items
 
 
