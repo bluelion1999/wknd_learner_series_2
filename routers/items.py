@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from database import get_db
 from models import ItemDB
 from schemas import ItemCreate, ItemResponse
@@ -21,8 +22,12 @@ def get_item(item_id: int, db: Session = Depends(get_db)):
 @router.post("", response_model=ItemResponse)
 def post_items(item: ItemCreate, db: Session = Depends(get_db)):
     db_item = ItemDB(name=item.name, price=item.price, category_id=item.category_id, in_stock=item.in_stock)
-    db.add(db_item)
-    db.commit()
+    try:
+        db.add(db_item)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Category does not exist")
     db.refresh(db_item)
     return db_item
 
@@ -37,9 +42,12 @@ def update_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
     db_item.category_id = item.category_id
     db_item.in_stock = item.in_stock
     
-    
-    db.commit()
-    db.refresh(db_item)
+    try:
+        db.commit()
+        db.refresh(db_item)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Category does not exist")
     return db_item    
         
 @router.delete("/{item_id}")
