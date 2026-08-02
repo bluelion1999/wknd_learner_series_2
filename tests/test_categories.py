@@ -122,7 +122,6 @@ def test_delete_category_with_items(client):
 
 
 def create_categories(client, count):
-    """Create `count` categories named cat0..catN and return their ids in order."""
     return [
         client.post("/categories", json={"name": f"cat{i}"}).json()["id"]
         for i in range(count)
