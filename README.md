@@ -4,7 +4,11 @@
 
 A small but complete REST API for managing inventory items and the categories they belong to. Built with FastAPI and PostgreSQL, containerized end to end, with schema migrations and a full test suite.
 
-Built as a weekend learning project — the commit history walks from a single `hello world` endpoint to what's here now, one concept at a time.
+## About this project
+
+This is entry #2 in a weekend learner series I'm building for myself. The approach is project based: I pick tools I don't know yet and have Claude teach me how to use them by walking me through building something real, rather than handing me finished code. The commit history reflects that, starting from a single `hello world` endpoint and adding one concept at a time.
+
+It taught me a lot. Not just how much genuinely goes into making an API robust, but how easily something slips through the cracks along the way: a missing test, an assumption never checked, a library default quietly doing something other than what you assumed. Great exercise.
 
 ## Stack
 
@@ -115,7 +119,7 @@ alembic/             migrations
 tests/               pytest suite
 ```
 
-Models describe the database; schemas describe the API. They're deliberately separate — the two diverge as soon as the database stores something the API shouldn't expose.
+Models describe the database; schemas describe the API. They're deliberately separate, because the two diverge as soon as the database stores something the API shouldn't expose.
 
 ## Tests
 
@@ -147,19 +151,19 @@ docker compose exec api alembic downgrade -1   # roll back one migration
 docker compose exec api alembic history        # list migrations
 ```
 
-Run migrations *before* deploying code that depends on them — new code against an old schema fails on every request.
+Run migrations *before* deploying code that depends on them. New code against an old schema fails on every request.
 
 ## Design notes
 
 **Deleting a category with items is refused, not cascaded.** The relationship uses `passive_deletes=True` so SQLAlchemy doesn't quietly null out the children's `category_id`; the database's foreign key fires instead and the API returns `409`. Reassign or delete the items first. Silently orphaning rows is the kind of data loss nobody notices until much later.
 
-**List endpoints are ordered and bounded.** `OFFSET`/`LIMIT` without `ORDER BY` gives no stable pagination — rows can shift between queries, so pages may repeat or skip records. Both list endpoints order by `id`, and `limit` is capped at 100.
+**List endpoints are ordered and bounded.** `OFFSET`/`LIMIT` without `ORDER BY` gives no stable pagination, because rows can shift between queries, so pages may repeat or skip records. Both list endpoints order by `id`, and `limit` is capped at 100.
 
 **Related data is eager-loaded.** Serializing a nested category per item would issue one query per row (the N+1 problem). `selectinload` fetches them in a single additional query, so the query count doesn't grow with the result size.
 
-**Integrity errors are handled centrally, with local overrides.** A global handler maps Postgres error codes to HTTP status — `23505` to `409`, `23503` to `400`. Routes that can give a more specific message, like category deletion, catch the error themselves; the global handler is the fallback.
+**Integrity errors are handled centrally, with local overrides.** A global handler maps Postgres error codes to HTTP status: `23505` to `409`, `23503` to `400`. Routes that can give a more specific message, like category deletion, catch the error themselves; the global handler is the fallback.
 
-**Credentials come from the environment.** Nothing sensitive is committed — see `.env.example` for the required variables.
+**Credentials come from the environment.** Nothing sensitive is committed. See `.env.example` for the required variables.
 
 ## CI
 
