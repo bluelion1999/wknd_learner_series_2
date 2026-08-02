@@ -11,6 +11,7 @@ class ItemDB(Base):
     price = Column(Float, nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     in_stock = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     category = relationship("CategoryDB", back_populates="items")
     
 class CategoryDB(Base):

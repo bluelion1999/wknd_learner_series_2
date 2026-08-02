@@ -13,6 +13,7 @@ class ItemResponse(BaseModel):
     price: float
     category_id: int | None
     in_stock: bool
+    created_at: datetime
     
     class Config:
         from_attributes = True
