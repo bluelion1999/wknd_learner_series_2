@@ -5,9 +5,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app import app
-from database import Base, get_db
-import models  # noqa: F401  -- registers tables on Base.metadata
+from app.main import app
+from app.database import Base, get_db
+from app import models  # noqa: F401  -- registers tables on Base.metadata
 
 TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 

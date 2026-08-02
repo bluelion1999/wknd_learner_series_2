@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
-from routers import categories, items
+from app.routers import categories, items
 
 app = FastAPI()
 

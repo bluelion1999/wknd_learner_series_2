@@ -21,7 +21,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       TEST_DATABASE_URL: ${TEST_DATABASE_URL}
     volumes:
-      - .:/app
+      - .:/code
     ports:
       - "8000:8000"
     depends_on:
