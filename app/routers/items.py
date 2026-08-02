@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from app.database import get_db
 from app.models import ItemDB
+from app.dependencies import PaginationParams
 from app.schemas import DeleteResponse, ItemCreate, ItemResponse
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -16,9 +17,16 @@ def get_item_or_404(item_id: int, db: Session = Depends(get_db)) -> ItemDB:
 
 
 @router.get("", response_model=list[ItemResponse])
-def list_items(db: Session = Depends(get_db)):
+def list_items(
+    pagination: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+):
     db_items = db.execute(
-        select(ItemDB).options(selectinload(ItemDB.category))
+        select(ItemDB)
+        .options(selectinload(ItemDB.category))
+        .order_by(ItemDB.id)
+        .offset(pagination.skip)
+        .limit(pagination.limit)
     ).scalars().all()
 
     return db_items

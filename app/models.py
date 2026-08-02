@@ -31,4 +31,6 @@ class CategoryDB(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
-    items: Mapped[list["ItemDB"]] = relationship(back_populates="category")
+    items: Mapped[list["ItemDB"]] = relationship(
+        back_populates="category", passive_deletes=True
+    )

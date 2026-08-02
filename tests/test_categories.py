@@ -48,10 +48,74 @@ def test_create_category_blank_name(client):
 
 def test_create_category_strips_name(client):
     response = client.post("/categories", json={"name": " spaced ", "description": "asdfasdf"})
-        
+
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["name"] == "spaced"
-    
-    
+
+
+def test_get_category(client):
+    created = client.post("/categories", json={"name": "tools", "description": "hardware"})
+    category_id = created.json()["id"]
+
+    response = client.get(f"/categories/{category_id}")
+
+    assert response.status_code == 200
+    assert response.json()["name"] == "tools"
+
+
+def test_get_category_not_found(client):
+    response = client.get("/categories/999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Category not found"
+
+
+def test_update_category(client):
+    created = client.post("/categories", json={"name": "tools", "description": "hardware"})
+    category_id = created.json()["id"]
+
+    response = client.put(
+        f"/categories/{category_id}",
+        json={"name": "hand tools", "description": "manual hardware"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "hand tools"
+    assert data["description"] == "manual hardware"
+
+
+def test_update_category_not_found(client):
+    response = client.put("/categories/999", json={"name": "ghost"})
+
+    assert response.status_code == 404
+
+
+def test_delete_category(client):
+    created = client.post("/categories", json={"name": "temporary"})
+    category_id = created.json()["id"]
+
+    response = client.delete(f"/categories/{category_id}")
+
+    assert response.status_code == 200
+    assert response.json() == {"deleted": category_id}
+    assert client.get(f"/categories/{category_id}").status_code == 404
+
+
+def test_delete_category_not_found(client):
+    response = client.delete("/categories/999")
+
+    assert response.status_code == 404
+
+
+def test_delete_category_with_items(client):
+    created = client.post("/categories", json={"name": "occupied"})
+    category_id = created.json()["id"]
+    client.post("/items", json={"name": "widget", "price": 1.0, "category_id": category_id})
+
+    response = client.delete(f"/categories/{category_id}")
+
+    assert response.status_code == 409
+    assert client.get(f"/categories/{category_id}").status_code == 200
