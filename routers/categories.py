@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
@@ -10,7 +11,7 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 
 @router.get("", response_model=list[CategoryResponse])
 def list_categories(db: Session = Depends(get_db)):
-    db_categories = db.query(CategoryDB).all()
+    db_categories = db.execute(select(CategoryDB)).scalars().all()
     return db_categories
 
 

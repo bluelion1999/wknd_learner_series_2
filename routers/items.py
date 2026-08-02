@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
@@ -10,13 +11,13 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 @router.get("", response_model=list[ItemResponse])
 def list_items(db: Session = Depends(get_db)):
-    db_items = db.query(ItemDB).all()
+    db_items = db.execute(select(ItemDB)).scalars().all()
     return db_items
 
 
 @router.get("/{item_id}", response_model=ItemResponse)
 def get_item(item_id: int, db: Session = Depends(get_db)):
-    db_item = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+    db_item = db.get(ItemDB, item_id)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_item
@@ -42,7 +43,7 @@ def create_item(item: ItemCreate, db: Session = Depends(get_db)):
 
 @router.put("/{item_id}", response_model=ItemResponse)
 def update_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
-    db_item = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+    db_item = db.get(ItemDB, item_id)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -62,7 +63,7 @@ def update_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
 
 @router.delete("/{item_id}", response_model=DeleteResponse)
 def delete_item(item_id: int, db: Session = Depends(get_db)):
-    db_item = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+    db_item = db.get(ItemDB, item_id)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
