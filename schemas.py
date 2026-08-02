@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 class ItemCreate(BaseModel):
@@ -15,8 +15,8 @@ class ItemResponse(BaseModel):
     in_stock: bool
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+    
         
 class CategoryCreate(BaseModel):
     name: str
@@ -28,6 +28,5 @@ class CategoryResponse(BaseModel):
     description: str | None
     created_at: datetime
     
-    class Config:
-        from_attributes = True 
+    model_config = ConfigDict(from_attributes=True)
     
