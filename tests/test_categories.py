@@ -119,3 +119,42 @@ def test_delete_category_with_items(client):
 
     assert response.status_code == 409
     assert client.get(f"/categories/{category_id}").status_code == 200
+
+
+def create_categories(client, count):
+    """Create `count` categories named cat0..catN and return their ids in order."""
+    return [
+        client.post("/categories", json={"name": f"cat{i}"}).json()["id"]
+        for i in range(count)
+    ]
+
+
+def test_list_categories_respects_limit(client):
+    create_categories(client, 3)
+
+    response = client.get("/categories?limit=2")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_list_categories_respects_skip(client):
+    create_categories(client, 3)
+
+    response = client.get("/categories?skip=2")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+
+def test_list_categories_pages_do_not_overlap(client):
+    category_ids = create_categories(client, 4)
+
+    page1 = client.get("/categories?skip=0&limit=2")
+    page2 = client.get("/categories?skip=2&limit=2")
+
+    assert page1.status_code == 200
+    assert page2.status_code == 200
+
+    assert [c["id"] for c in page1.json()] == category_ids[:2]
+    assert [c["id"] for c in page2.json()] == category_ids[2:]
