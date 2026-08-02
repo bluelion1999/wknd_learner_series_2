@@ -1,24 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from database import get_db, ItemDB
+from database import get_db, Base, engine
+
+from models import ItemDB
+from schemas import ItemResponse, ItemCreate
 
 app = FastAPI()
 
-class ItemCreate(BaseModel):
-    name: str
-    price: float
-    in_stock: bool = True
-
-class ItemResponse(BaseModel):
-    id: int
-    name: str
-    price: float
-    in_stock: bool
-    
-    class Config:
-        from_attributes = True
-
+Base.metadata.create_all(bind=engine)
 
 @app.get("/items", response_model=list[ItemResponse])
 def get_items(db: Session = Depends(get_db)):
